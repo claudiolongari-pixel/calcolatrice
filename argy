@@ -1,0 +1,244 @@
+["d2","yi"].forEach(function(i){$(i).addEventListener("input",calc2);$(i).addEventListener("change",calc2);});
+function xirr(cf){
+  var t0=cf[0].t,g=function(y){var s=0;cf.forEach(function(c){s+=c.v/Math.pow(1+y,(c.t-t0)/86400000/365);});return s;};
+  var lo=-0.99,hi=1000;if(g(lo)*g(hi)>0)return NaN;
+  for(var i=0;i<300;i++){var m=(lo+hi)/2;if(g(lo)*g(m)<=0)hi=m;else lo=m;}
+  return (lo+hi)/2;
+}
+function calc3(){
+  var m=$("m3");m.textContent="";clear(["ti3","ox3","ri3","fl3","ne3","cp3","ca3","tr3","gg3","cf3"]);$("tb3").innerHTML="";
+  var vb=checkDate($("d3").value,m);if(isNaN(vb))return;
+  var pa=num($("pa").value);if(!(pa>0)){m.textContent="Inserire un prezzo di acquisto maggiore di zero.";return;}
+  var vs=ms($("e3").value||"");
+  if(isNaN(vs)){m.textContent="Inserire una data di vendita valida.";return;}
+  if(vs<vb||vs>MAX){m.textContent="La vendita deve essere compresa tra la data di acquisto e la scadenza.";return;}
+  var ps=num($("ps").value);if(!(ps>0)){m.textContent="Inserire un prezzo di vendita maggiore di zero.";return;}
+  var N=num($("nm").value);if(!(N>0)){m.textContent="Inserire un nominale maggiore di zero.";return;}
+  var sb=setup(vb),ss=setup(vs);
+  if(sb.coef<=0){m.textContent="Alla scadenza non è più possibile acquistare.";return;}
+  var no=N/sb.coef,out=pa/100*N,cp=0,ca=0,cf=[{t:vb,v:-out}];
+  var h="<tr><th>Data</th><th>Flusso (100 emessi)</th><th>Cedole</th><th>Capitale</th></tr>";
+  ROWS.forEach(function(r,i){
+    var prev=i?ROWS[i-1].res:100,am=prev-r.res,it=r.flow-am,k=no/100;
+    if(r.t>vb&&r.t<=vs){cp+=it*k;ca+=am*k;cf.push({t:r.t,v:r.flow*k});
+      h+="<tr><td>"+itd(r.iso)+"</td><td>"+f(r.flow,4)+"</td><td>"+f(it*k,2)+"</td><td>"+f(am*k,2)+"</td></tr>";}
+    else h+='<tr class="x"><td>'+itd(r.iso)+"</td><td>"+f(r.flow,4)+"</td><td>–</td><td>–</td></tr>";
+  });
+  var ric=ps/100*no*ss.coef;cf.push({t:vs,v:ric});
+  var net=cp+ca+ric-out,y=vs>vb?xirr(cf):NaN;
+  $("ti3").textContent=isNaN(y)?"n.d.":f(y*100,3)+"%";
+  $("ox3").textContent=f(out,2);$("ri3").textContent=f(ric,2);$("fl3").textContent=f(cp+ca,2);$("ne3").textContent=f(net,2);
+  $("cp3").textContent=f(cp,2);$("ca3").textContent=f(ca,2);$("tr3").textContent=f(net/out*100,2)+"%";
+  $("gg3").textContent=Math.round((vs-vb)/86400000);$("cf3").textContent=f(sb.coef,4)+" / "+f(ss.coef,4);
+  $("tb3").innerHTML=h;
+}
+["d3","pa","e3","ps","nm"].forEach(function(i){$(i).addEventListener("input",calc3);$(i).addEventListener("change",calc3);});
+function tab(n){
+  [1,2,3].forEach(function(k){$("p"+k).hidden=n!==k;$("t"+k).setAttribute("aria-selected",n===k);});
+}
+[1,2,3].forEach(function(k){$("t"+k).addEventListener("click",function(){tab(k);});});
+calc1();calc2();calc3();
+})();
+</script><style>
+#pxb{--bg:#f3f6fb;--card:#fff;--ink:#1b2430;--mut:#5d6b7e;--line:#d5dde9;--pri:#1f3864;--acc:#2f5597;--inp:#fff7d6;--inpb:#d9a21b;--out:#e4f2dd;--err:#b3261e;background:var(--bg);color:var(--ink);font:15px/1.45 Arial,Helvetica,sans-serif;padding:6px;border-radius:10px;text-align:left}
+#pxb *{box-sizing:border-box}
+#pxb .pxw{max-width:760px;margin:0 auto;padding:8px}
+#pxb header{background:var(--pri);color:#fff;border-radius:10px;padding:16px 18px}
+#pxb header h1{margin:0;font-size:20px;color:#fff}#pxb header p{margin:4px 0 0;font-size:13px;opacity:.85;color:#fff}
+#pxb .tabs{display:flex;gap:6px;margin:14px 0 0}
+#pxb .tabs button{flex:1;padding:11px 8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:bold;border-radius:8px 8px 0 0;cursor:pointer}
+#pxb .tabs button[aria-selected="true"]{background:var(--acc);color:#fff;border-color:var(--acc)}
+#pxb .card{background:var(--card);border:1px solid var(--line);border-radius:0 0 10px 10px;padding:16px}
+#pxb .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){#pxb .grid,#pxb .res{grid-template-columns:1fr}}
+#pxb label{display:block;font-weight:bold;font-size:13px;margin-bottom:4px;color:var(--ink)}
+#pxb .hint{font-weight:normal;color:var(--mut);font-size:12px;display:block}
+#pxb input,#pxb select{width:100%;padding:10px;font:inherit;font-size:16px;color:#1b2430;background:var(--inp);border:2px solid var(--inpb);border-radius:7px;margin:0}
+#pxb .msg{min-height:20px;margin:10px 0 0;font-weight:bold;color:var(--err);font-size:13px}
+#pxb .res{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+#pxb .r{background:var(--out);border-radius:8px;padding:10px 12px}
+#pxb .r span{display:block;font-size:12px;color:var(--mut)}
+#pxb .r b{font-size:22px;color:var(--ink)}
+#pxb .r.big{grid-column:1/-1}#pxb .r.big b{font-size:30px}
+#pxb .sm{background:transparent;border:1px solid var(--line)}#pxb .sm b{font-size:16px}
+#pxb details{margin-top:14px}#pxb summary{cursor:pointer;font-weight:bold;color:var(--acc)}
+#pxb .tw{overflow-x:auto;margin-top:8px}
+#pxb table{border-collapse:collapse;width:100%;font-size:12px}
+#pxb th,#pxb td{border:1px solid var(--line);padding:4px 6px;text-align:right;white-space:nowrap;color:var(--ink)}
+#pxb th{background:var(--acc);color:#fff}
+#pxb tr.x td{color:var(--mut);text-decoration:line-through}
+#pxb .note{font-size:12px;color:var(--mut);margin-top:14px}
+#pxb .note li{margin-bottom:4px}
+#pxb [hidden]{display:none!important}
+</style>
+
+<div id="pxpxb"><div class="pxw">
+<header><h1>Pricer obbligazione argentina ammortizzante</h1><p>ISIN XS0501195993 · scadenza 31/12/2038 · prezzi tel quel</p></header>
+
+<div class="tabs" role="tablist">
+<button role="tab" id="pxt1" aria-selected="true">Da prezzo a rendimento</button>
+<button role="tab" id="pxt2" aria-selected="false">Da rendimento a prezzo</button>
+<button role="tab" id="pxt3" aria-selected="false">Acquisto e vendita</button>
+</div>
+
+<div class="card">
+<!-- CALCOLATRICE 1 -->
+<section id="pxp1">
+<div class="grid">
+<div><label for="pxd1">Data di valorizzazione<span class="hint">dal 01/10/2026 alla scadenza</span></label><input type="date" id="pxd1" min="2026-10-01" max="2038-12-31" value="2026-10-30"></div>
+<div><label for="pxpr">Prezzo tel quel di acquisto<span class="hint">corso di mercato, rateo incluso (es. 51,50)</span></label><input type="text" id="pxpr" inputmode="decimal" value="51,50"></div>
+</div>
+<div style="margin-top:12px"><label for="pxbs">Il prezzo è riferito a<span class="hint">di norma il mercato quota sul nominale residuo</span></label>
+<select id="pxbs"><option value="res">Nominale residuo (convenzione di mercato)</option><option value="orig">Nominale originario</option></select></div>
+<div class="msg" id="pxm1"></div>
+<div class="res">
+<div class="r big"><span>Rendimento effettivo annuo a scadenza</span><b id="pxy1">–</b></div>
+<div class="r"><span>Duration modificata (anni)</span><b id="pxmd1">–</b></div>
+<div class="r"><span>Duration di Macaulay (anni)</span><b id="pxmc1">–</b></div>
+<div class="r sm"><span>Nominale residuo (per 100 emessi)</span><b id="pxrs1">–</b></div>
+<div class="r sm"><span>Coefficiente di rettifica</span><b id="pxcf1">–</b></div>
+<div class="r sm"><span>Prezzo su 100 di nominale originario</span><b id="pxpo1">–</b></div>
+<div class="r sm"><span>Flussi futuri considerati</span><b id="pxn1">–</b></div>
+</div>
+<details><summary>Mostra i flussi considerati</summary><div class="tw"><table id="pxtb1"></table></div></details>
+</section>
+
+<!-- CALCOLATRICE 2 -->
+<section id="pxp2" hidden>
+<div class="grid">
+<div><label for="pxd2">Data di valorizzazione<span class="hint">dal 01/10/2026 alla scadenza</span></label><input type="date" id="pxd2" min="2026-10-01" max="2038-12-31" value="2026-10-30"></div>
+<div><label for="pxyi">Rendimento effettivo annuo (%)<span class="hint">es. 12,5</span></label><input type="text" id="pxyi" inputmode="decimal" value="12,00"></div>
+</div>
+<div class="msg" id="pxm2"></div>
+<div class="res">
+<div class="r big"><span>Prezzo tel quel (% del nominale residuo)</span><b id="pxpp2">–</b></div>
+<div class="r"><span>Duration modificata (anni)</span><b id="pxmd2">–</b></div>
+<div class="r"><span>Duration di Macaulay (anni)</span><b id="pxmc2">–</b></div>
+<div class="r sm"><span>Nominale residuo (per 100 emessi)</span><b id="pxrs2">–</b></div>
+<div class="r sm"><span>Coefficiente di rettifica</span><b id="pxcf2">–</b></div>
+<div class="r sm"><span>Prezzo su 100 di nominale originario</span><b id="pxpo2">–</b></div>
+<div class="r sm"><span>Flussi futuri considerati</span><b id="pxn2">–</b></div>
+</div>
+<details><summary>Mostra i flussi considerati</summary><div class="tw"><table id="pxtb2"></table></div></details>
+</section>
+
+<section id="pxp3" hidden>
+<div class="grid">
+<div><label for="pxd3">Data di acquisto<span class="hint">dal 01/10/2026 alla scadenza</span></label><input type="date" id="pxd3" min="2026-10-01" max="2038-12-31" value="2026-10-30"></div>
+<div><label for="pxpa">Prezzo di acquisto tel quel<span class="hint">% del nominale residuo (es. 51,50)</span></label><input type="text" id="pxpa" inputmode="decimal" value="51,50"></div>
+<div><label for="pxe3">Data di vendita<span class="hint">dall’acquisto alla scadenza</span></label><input type="date" id="pxe3" min="2026-10-01" max="2038-12-31" value="2028-10-31"></div>
+<div><label for="pxps">Prezzo di vendita tel quel<span class="hint">% del nominale residuo alla vendita</span></label><input type="text" id="pxps" inputmode="decimal" value="55,00"></div>
+</div>
+<div style="margin-top:12px"><label for="pxnm">Nominale acquistato (residuo)<span class="hint">importo nella valuta del titolo, alla data di acquisto</span></label><input type="text" id="pxnm" inputmode="decimal" value="100000"></div>
+<div class="msg" id="pxm3"></div>
+<div class="res">
+<div class="r big"><span>TIR dell’operazione (annuo effettivo)</span><b id="pxti3">–</b></div>
+<div class="r"><span>Esborso in acquisto</span><b id="pxox3">–</b></div>
+<div class="r"><span>Ricavo in vendita</span><b id="pxri3">–</b></div>
+<div class="r"><span>Flussi percepiti (cedole + rimborsi)</span><b id="pxfl3">–</b></div>
+<div class="r"><span>Risultato netto</span><b id="pxne3">–</b></div>
+<div class="r sm"><span>di cui cedole</span><b id="pxcp3">–</b></div>
+<div class="r sm"><span>di cui rimborsi di capitale</span><b id="pxca3">–</b></div>
+<div class="r sm"><span>Rendimento totale (non annualizzato)</span><b id="pxtr3">–</b></div>
+<div class="r sm"><span>Durata (giorni)</span><b id="pxgg3">–</b></div>
+<div class="r sm"><span>Coefficiente di rettifica acquisto / vendita</span><b id="pxcf3">–</b></div>
+</div>
+<details><summary>Mostra i flussi considerati</summary><div class="tw"><table id="pxtb3"></table></div></details>
+</section>
+
+<ul class="note">
+<li>Prezzo tel quel = comprensivo di rateo. Il prezzo quotato è riferito al nominale residuo: viene riparametrato con il coefficiente di rettifica (nominale residuo ÷ 100).</li>
+<li>Sono ignorati i flussi (cedole e ammortamenti) con data uguale o precedente alla data di valorizzazione.</li>
+<li>Rendimento effettivo annuo composto, base act/365 (come XIRR di Excel). Duration modificata = Macaulay ÷ (1 + rendimento), calcolata sui soli flussi futuri.</li>
+<li>Acquisto e vendita: i prezzi sono sul nominale residuo alla rispettiva data (il coefficiente può cambiare per ammortamento). Si incassano i flussi dopo l’acquisto e fino alla vendita compresa. Il TIR non considera tasse, commissioni né reinvestimenti. Vendita a scadenza: ricavo nullo, il capitale è nei flussi.</li>
+<li>Ipotesi: ultima cedola staccata il 30/09/2026 con residuo 100. Nessuna considerazione di rischio di credito o ristrutturazione. Strumento a solo scopo informativo, non è consulenza finanziaria.</li>
+</ul>
+</div>
+</div>
+</div>
+<script>
+(function(){
+// ---- piano flussi (per 100 di nominale emesso) ----
+var DATES=["2027-03-31","2027-09-30","2028-03-31","2028-10-02","2029-04-02","2029-10-01","2030-04-01","2030-09-30","2031-03-31","2031-09-30","2032-03-31","2032-09-30","2033-03-31","2033-09-30","2034-03-31","2034-10-02","2035-04-02","2035-10-01","2036-03-31","2036-09-30","2037-03-31","2037-09-30","2038-03-31","2038-09-30","2038-12-31"];
+function ms(s){var p=s.split("-");return Date.UTC(+p[0],+p[1]-1,+p[2]);}
+var ROWS=(function(){
+  var res=100,prevRate=3.38,out=[];
+  for(var i=0;i<DATES.length;i++){
+    var am=i>=5?5:0, fr=i===DATES.length-1?0.25:0.5;
+    var cp=res*prevRate/100*fr, after=res-am;
+    out.push({iso:DATES[i],t:ms(DATES[i]),flow:am+cp,res:after});
+    prevRate=i>=4?4.74:3.38; res=after;
+  }
+  return out;
+})();
+var MIN=ms("2026-10-01"),MAX=ms(DATES[DATES.length-1]);
+
+function num(s){return parseFloat(String(s).replace(/\s/g,"").replace(",","."));}
+function f(x,d){return x.toLocaleString("it-IT",{minimumFractionDigits:d,maximumFractionDigits:d});}
+function itd(iso){var p=iso.split("-");return p[2]+"/"+p[1]+"/"+p[0];}
+function $(id){return document.getElementById("px"+id);}
+
+function setup(v){
+  var resid=100;
+  ROWS.forEach(function(r){if(r.t<=v)resid=r.res;});
+  var fut=ROWS.filter(function(r){return r.t>v;});
+  return {resid:resid,coef:resid/100,fut:fut};
+}
+function pv(fut,v,y){var s=0;fut.forEach(function(r){s+=r.flow/Math.pow(1+y,(r.t-v)/86400000/365);});return s;}
+function solve(fut,v,dirty){
+  var lo=-0.95,hi=20,g=function(y){return pv(fut,v,y)-dirty;};
+  if(g(lo)*g(hi)>0)return NaN;
+  for(var i=0;i<200;i++){var m=(lo+hi)/2;if(g(lo)*g(m)<=0)hi=m;else lo=m;}
+  return (lo+hi)/2;
+}
+function dur(fut,v,y){
+  var a=0,b=0;fut.forEach(function(r){var t=(r.t-v)/86400000/365,p=r.flow/Math.pow(1+y,t);a+=t*p;b+=p;});
+  var mac=a/b;return {mac:mac,mod:mac/(1+y)};
+}
+function table(el,fut,v,y){
+  var h="<tr><th>Data</th><th>Flusso</th><th>t (anni)</th><th>Val. attuale</th></tr>";
+  ROWS.forEach(function(r){
+    if(r.t>v){var t=(r.t-v)/86400000/365;h+="<tr><td>"+itd(r.iso)+"</td><td>"+f(r.flow,4)+"</td><td>"+f(t,4)+"</td><td>"+(isNaN(y)?"–":f(r.flow/Math.pow(1+y,t),4))+"</td></tr>";}
+    else h+='<tr class="x"><td>'+itd(r.iso)+"</td><td>"+f(r.flow,4)+"</td><td>–</td><td>–</td></tr>";
+  });
+  el.innerHTML=h;
+}
+function clear(ids){ids.forEach(function(i){$(i).textContent="–";});}
+function checkDate(iso,m){
+  var v=ms(iso||"");
+  if(!iso||isNaN(v)){m.textContent="Inserire una data valida.";return NaN;}
+  if(v<MIN||v>MAX){m.textContent="Data fuori intervallo: ammessa dal 01/10/2026 al 31/12/2038.";return NaN;}
+  return v;
+}
+function show(k,s,v){
+  $("rs"+k).textContent=f(s.resid,2);$("cf"+k).textContent=f(s.coef,4);$("n"+k).textContent=s.fut.length;
+}
+
+function calc1(){
+  var m=$("m1");m.textContent="";clear(["y1","md1","mc1","rs1","cf1","po1","n1"]);$("tb1").innerHTML="";
+  var v=checkDate($("d1").value,m);if(isNaN(v))return;
+  var p=num($("pr").value);
+  if(!(p>0)){m.textContent="Inserire un prezzo maggiore di zero.";return;}
+  var s=setup(v);show(1,s,v);
+  if(s.fut.length===0){m.textContent="Alla scadenza non restano flussi: rendimento non calcolabile.";return;}
+  var dirty=$("bs").value==="res"?p*s.coef:p;
+  $("po1").textContent=f(dirty,4);
+  var y=solve(s.fut,v,dirty);
+  if(isNaN(y)){m.textContent="Rendimento non determinabile con questo prezzo.";table($("tb1"),s.fut,v,NaN);return;}
+  var d=dur(s.fut,v,y);
+  $("y1").textContent=f(y*100,3)+"%";$("md1").textContent=f(d.mod,3);$("mc1").textContent=f(d.mac,3);
+  table($("tb1"),s.fut,v,y);
+}
+function calc2(){
+  var m=$("m2");m.textContent="";clear(["pp2","md2","mc2","rs2","cf2","po2","n2"]);$("tb2").innerHTML="";
+  var v=checkDate($("d2").value,m);if(isNaN(v))return;
+  var y=num($("yi").value)/100;
+  if(isNaN(y)||y<=-0.95){m.textContent="Inserire un rendimento valido (maggiore di -95%).";return;}
+  var s=setup(v);show(2,s,v);
+  if(s.fut.length===0){m.textContent="Alla scadenza non restano flussi da attualizzare.";return;}
+  var orig=pv(s.fut,v,y),d=dur(s.fut,v,y);
+  $("po2").textContent=f(orig,4);$("pp2").textContent=f(orig/s.coef,4);
+  $("md2").textContent=f(d.mod,3);$("mc2").textContent=f(d.mac,3);
+  table($("tb2"),s.fut,v,y);
+}
+["d1","pr","bs"].forEach(function(i){$(i).addEventListener("input",calc1);$(i).addEventListener("change",calc1);});
